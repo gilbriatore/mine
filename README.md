@@ -1,2 +1,2 @@
 # mine
-Mine makes life easy.
+mine makes life easy
