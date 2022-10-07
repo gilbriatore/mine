@@ -4,7 +4,23 @@ import 'package:mine/afazeres.dart';
 import 'gastos.dart';
 import 'metas.dart';
 
-void main() {
+import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
+
+void main() async {
+
+  WidgetsFlutterBinding.ensureInitialized();
+  final keyApplicationId = 'Mb8K7SxirA9aPEuzowzhQyXg94iGs5bZyUVS3iBU';
+  final keyClientKey = 'nRRtAPSsnM0UIJppNkAq46ddgy5fy2TknjiIxga4';
+  final keyParseServerUrl = 'https://parseapi.back4app.com';
+
+  await Parse().initialize(keyApplicationId, keyParseServerUrl,
+      clientKey: keyClientKey, autoSendSessionId: true);
+
+  // var firstObject = ParseObject('Mensagem')
+  //   ..set(
+  //       'texto', 'Hey ! First message from Flutter. Parse is now connected');
+  // await firstObject.save();
+
   runApp(const MyApp());
 }
 
