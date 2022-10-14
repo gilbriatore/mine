@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
+
+import '../models/afazer.dart';
+import '../repositories/afazer_repository.dart';
 
 class AfazeresPage extends StatefulWidget {
   const AfazeresPage({Key? key, required this.title}) : super(key: key);
@@ -14,7 +16,6 @@ class AfazeresPage extends StatefulWidget {
 
 class _AfazeresPageState extends State<AfazeresPage> {
   final todoController = TextEditingController();
-  List<String> itens = ["Item 1", "Item 2", "Item 3", "Item 4"];
 
   Future<void> _showMyDialog() async {
     return showDialog<void>(
@@ -48,36 +49,7 @@ class _AfazeresPageState extends State<AfazeresPage> {
     );
   }
 
-  Future<void> saveTodo(String title) async {
-    final todo = ParseObject('Afazer')
-      ..set('title', title)
-      ..set('done', false);
-    await todo.save();
-  }
-
-  Future<List<ParseObject>> getTodo() async {
-    QueryBuilder<ParseObject> queryTodo =
-    QueryBuilder<ParseObject>(ParseObject('Afazer'));
-    final ParseResponse apiResponse = await queryTodo.query();
-
-    if (apiResponse.success && apiResponse.results != null) {
-      return apiResponse.results as List<ParseObject>;
-    } else {
-      return [];
-    }
-  }
-
-  Future<void> updateTodo(String id, bool done) async {
-    var todo = ParseObject('Afazer')
-      ..objectId = id
-      ..set('done', done);
-    await todo.save();
-  }
-
-  Future<void> deleteTodo(String id) async {
-    var todo = ParseObject('Afazer')..objectId = id;
-    await todo.delete();
-  }
+  AfazerRepository repository = AfazerRepository();
 
   void addToDo() async {
     if (todoController.text.trim().isEmpty) {
@@ -87,7 +59,7 @@ class _AfazeresPageState extends State<AfazeresPage> {
       ));
       return;
     }
-    await saveTodo(todoController.text);
+    await repository.saveTodo(todoController.text);
     setState(() {
       todoController.clear();
     });
@@ -101,8 +73,8 @@ class _AfazeresPageState extends State<AfazeresPage> {
         title: Text(widget.title),
       ),
       body: Container(
-          child: FutureBuilder<List<ParseObject>>(
-              future: getTodo(),
+          child: FutureBuilder<List<Afazer>>(
+              future: repository.listarAfazeres(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
@@ -130,9 +102,9 @@ class _AfazeresPageState extends State<AfazeresPage> {
                           itemBuilder: (context, index) {
                             //*************************************
                             //Get Parse Object Values
-                            final varTodo = snapshot.data![index];
-                            final varTitle = varTodo.get<String>('title')!;
-                            final varDone =  varTodo.get<bool>('done')!;
+                            final afazer = snapshot.data![index];
+                            final varTitle = afazer.titulo;
+                            final varDone =  afazer.realizada;
                             //*************************************
 
                             return ListTile(
@@ -150,8 +122,8 @@ class _AfazeresPageState extends State<AfazeresPage> {
                                   Checkbox(
                                       value: varDone,
                                       onChanged: (value) async {
-                                        await updateTodo(
-                                            varTodo.objectId!, value!);
+                                        await repository.updateTodo(
+                                            afazer.id, value!);
                                         setState(() {
                                           //Refresh UI
                                         });
@@ -162,7 +134,7 @@ class _AfazeresPageState extends State<AfazeresPage> {
                                       color: Colors.blue,
                                     ),
                                     onPressed: () async {
-                                      await deleteTodo(varTodo.objectId!);
+                                      await repository.deleteTodo(afazer.id);
                                       setState(() {
                                         final snackBar = SnackBar(
                                           content: Text("Todo deleted!"),

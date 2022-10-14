@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mine/afazeres.dart';
+import 'package:mine/views/afazeres_view.dart';
 
-import 'gastos.dart';
-import 'metas.dart';
+import 'views/gastos_view.dart';
+import 'views/metas_view.dart';
 
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 
