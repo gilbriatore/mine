@@ -5,11 +5,17 @@ import '../models/afazer.dart';
 class AfazerRepository {
 
    //CRUD
-  Future<void> saveTodo(String title) async {
+  Future<Afazer?> salvarAfazer(Afazer afazer) async {
     final todo = ParseObject('Afazer')
-      ..set('title', title)
-      ..set('done', false);
-    await todo.save();
+      ..set('title', afazer.titulo)
+      ..set('done', afazer.realizada);
+    final ParseResponse response = await todo.save();
+    if (response.success && response.result != null) {
+      final object = response.result as ParseObject;
+      afazer.id = object.objectId!;
+      return afazer;
+    }
+    return null;
   }
 
   Future<List<Afazer>> listarAfazeres() async {
@@ -25,9 +31,8 @@ class AfazerRepository {
         final id = object.objectId;
         final titulo = object.get<String>('title')!;
         final realizada =  object.get<bool>('done')!;
-        Afazer afazer = Afazer();
+        Afazer afazer = Afazer(titulo);
         afazer.id = id!;
-        afazer.titulo = titulo;
         afazer.realizada = realizada;
         lista.add(afazer);
       }

@@ -9,42 +9,60 @@ part of 'afazer_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AfazerStore on _AfazerStore, Store {
-  late final _$tituloAtom = Atom(name: '_AfazerStore.titulo', context: context);
+  Computed<bool>? _$isCarregandoComputed;
 
   @override
-  String get titulo {
-    _$tituloAtom.reportRead();
-    return super.titulo;
+  bool get isCarregando =>
+      (_$isCarregandoComputed ??= Computed<bool>(() => super.isCarregando,
+              name: '_AfazerStore.isCarregando'))
+          .value;
+
+  late final _$listaDeAfazeresAtom =
+      Atom(name: '_AfazerStore.listaDeAfazeres', context: context);
+
+  @override
+  ObservableList<Afazer> get listaDeAfazeres {
+    _$listaDeAfazeresAtom.reportRead();
+    return super.listaDeAfazeres;
   }
 
   @override
-  set titulo(String value) {
-    _$tituloAtom.reportWrite(value, super.titulo, () {
-      super.titulo = value;
+  set listaDeAfazeres(ObservableList<Afazer> value) {
+    _$listaDeAfazeresAtom.reportWrite(value, super.listaDeAfazeres, () {
+      super.listaDeAfazeres = value;
     });
   }
 
-  late final _$realizadaAtom =
-      Atom(name: '_AfazerStore.realizada', context: context);
+  late final _$obsFutureAtom =
+      Atom(name: '_AfazerStore.obsFuture', context: context);
 
   @override
-  bool get realizada {
-    _$realizadaAtom.reportRead();
-    return super.realizada;
+  ObservableFuture<List<Afazer>> get obsFuture {
+    _$obsFutureAtom.reportRead();
+    return super.obsFuture;
   }
 
   @override
-  set realizada(bool value) {
-    _$realizadaAtom.reportWrite(value, super.realizada, () {
-      super.realizada = value;
+  set obsFuture(ObservableFuture<List<Afazer>> value) {
+    _$obsFutureAtom.reportWrite(value, super.obsFuture, () {
+      super.obsFuture = value;
     });
+  }
+
+  late final _$carregarAfazeresAsyncAction =
+      AsyncAction('_AfazerStore.carregarAfazeres', context: context);
+
+  @override
+  Future<void> carregarAfazeres() {
+    return _$carregarAfazeresAsyncAction.run(() => super.carregarAfazeres());
   }
 
   @override
   String toString() {
     return '''
-titulo: ${titulo},
-realizada: ${realizada}
+listaDeAfazeres: ${listaDeAfazeres},
+obsFuture: ${obsFuture},
+isCarregando: ${isCarregando}
     ''';
   }
 }
