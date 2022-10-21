@@ -1,85 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mine/models_views/afazer_store.dart';
-import '../repositories/afazer_repository.dart';
 
-class AfazeresPage extends StatefulWidget {
-  const AfazeresPage({Key? key, required this.title}) : super(key: key);
-
+class AfazeresPage extends StatelessWidget {
+  AfazeresPage({Key? key, required this.title}) : super(key: key);
   final String title;
-
-  @override
-  State<AfazeresPage> createState() => _AfazeresPageState();
-}
-
-class _AfazeresPageState extends State<AfazeresPage> {
-
-  AfazerRepository repository = AfazerRepository();
   AfazerStore afazerStore = AfazerStore();
-
-
-  final todoController = TextEditingController();
-
-  Future<void> _showMyDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Incluir afazer'),
-          content: TextField(
-            autocorrect: true,
-            textCapitalization: TextCapitalization.sentences,
-            controller: todoController,
-            decoration: InputDecoration(
-                labelText: "Novo afazer",
-                labelStyle: TextStyle(color: Colors.blueAccent)),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'Cancelar'),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                addToDo();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-
-
-  void addToDo() async {
-    if (todoController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Empty title"),
-        duration: Duration(seconds: 2),
-      ));
-      return;
-    }
-    afazerStore.salvarAfazer(todoController.text);
-    setState(() {
-      todoController.clear();
-    });
-    Navigator.pop(context, 'OK');
-  }
+  final txtAfazerController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+
+    void adicionarAfazer() async {
+      if (txtAfazerController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Informar afazer"),
+          duration: Duration(seconds: 2),
+        ));
+        return;
+      }
+      afazerStore.salvarAfazer(txtAfazerController.text);
+      txtAfazerController.clear();
+      Navigator.pop(context, 'OK');
+    }
+
+    Future<void> _showMyDialog() async {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Incluir afazer'),
+            content: TextField(
+              autocorrect: true,
+              textCapitalization: TextCapitalization.sentences,
+              controller: txtAfazerController,
+              decoration: const InputDecoration(
+                  labelText: "Novo afazer",
+                  labelStyle: TextStyle(color: Colors.blueAccent)),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'Cancelar'),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  adicionarAfazer();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
+
+      ///Serve para atualizar a lista
       body: Observer(
         builder: (_){
           if (afazerStore.isCarregando){
-              return Center(
-                child: Container(
+              return const Center(
+                child: SizedBox(
                     width: 100,
                     height: 100,
                     child: CircularProgressIndicator()),
@@ -87,64 +74,55 @@ class _AfazeresPageState extends State<AfazeresPage> {
           }
 
           if (afazerStore.listaDeAfazeres.isEmpty){
-            return Center(
-              child: Container(
+            return const Center(
+              child: SizedBox(
                   width: 100,
                   height: 100,
-                  child: Text("Nenhum item cadastrado!")),
+                  child: Text("Nenhum item cadastrado!",
+                    style: TextStyle(
+                      fontSize: 20
+                    ),
+                  ),),
             );
           }
           return ListView.builder(
-              padding: EdgeInsets.only(top: 10.0),
+              padding: const EdgeInsets.only(top: 10.0),
               itemCount: afazerStore.listaDeAfazeres.length,
               itemBuilder: (context, index) {
-                //*************************************
-                //Get Parse Object Values
-                final afazer = afazerStore.listaDeAfazeres[index];
-                final varTitle = afazer.titulo;
-                final varDone = afazer.realizada;
-                //*************************************
 
-                return ListTile(
-                  title: Text(varTitle),
-                  leading: CircleAvatar(
-                    child: Icon(varDone ? Icons.check : Icons.error),
-                    backgroundColor: varDone ? Colors.green : Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Checkbox(
-                          value: varDone,
-                          onChanged: (value) async {
-                            await repository.updateTodo(
-                                afazer.id, value!);
-                            setState(() {
-                              //Refresh UI
-                            });
-                          }),
-                      IconButton(
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.blue,
-                        ),
-                        onPressed: () async {
-                          await repository.deleteTodo(afazer.id);
-                          setState(() {
-                            final snackBar = SnackBar(
-                              content: Text("Todo deleted!"),
-                              duration: Duration(seconds: 2),
-                            );
-                            ScaffoldMessenger.of(context)
-                              ..removeCurrentSnackBar()
-                              ..showSnackBar(snackBar);
-                          });
-                        },
-                      )
-                    ],
-                  ),
-                );
+                final afazer = afazerStore.listaDeAfazeres[index];
+
+                ///Serve para atualizar o item
+                return Observer(builder: (_){
+                  return ListTile(
+                    title: Text( afazer.titulo),
+                    leading: CircleAvatar(
+                      backgroundColor: afazer.realizada ? Colors.green : Colors.blue,
+                      foregroundColor: Colors.white,
+                      child: Icon(afazer.realizada ? Icons.check : Icons.error),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Checkbox(
+                            value: afazer.realizada,
+                            onChanged: (value) async {
+                              afazer.setSituacao(value!);
+                              afazerStore.atualizarAfazer(afazer);
+                            }),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.blue,
+                          ),
+                          onPressed: () async {
+                            afazerStore.excluirAfazer(afazer);
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                });
               },);
         }
       ),
@@ -152,7 +130,6 @@ class _AfazeresPageState extends State<AfazeresPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: _showMyDialog,
-        tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: BottomAppBar(

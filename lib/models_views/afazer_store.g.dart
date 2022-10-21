@@ -57,6 +57,22 @@ mixin _$AfazerStore on _AfazerStore, Store {
     return _$carregarAfazeresAsyncAction.run(() => super.carregarAfazeres());
   }
 
+  late final _$salvarAfazerAsyncAction =
+      AsyncAction('_AfazerStore.salvarAfazer', context: context);
+
+  @override
+  Future<void> salvarAfazer(String titulo) {
+    return _$salvarAfazerAsyncAction.run(() => super.salvarAfazer(titulo));
+  }
+
+  late final _$excluirAfazerAsyncAction =
+      AsyncAction('_AfazerStore.excluirAfazer', context: context);
+
+  @override
+  Future<void> excluirAfazer(Afazer afazer) {
+    return _$excluirAfazerAsyncAction.run(() => super.excluirAfazer(afazer));
+  }
+
   @override
   String toString() {
     return '''

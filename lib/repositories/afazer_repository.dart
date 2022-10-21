@@ -1,15 +1,19 @@
 import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
-
-import '../models/afazer.dart';
+import 'package:mine/models/afazer.dart';
 
 class AfazerRepository {
 
    //CRUD
   Future<Afazer?> salvarAfazer(Afazer afazer) async {
-    final todo = ParseObject('Afazer')
+    final parser = ParseObject('Afazer')
       ..set('title', afazer.titulo)
       ..set('done', afazer.realizada);
-    final ParseResponse response = await todo.save();
+
+    if (afazer.id.isNotEmpty){
+      parser.objectId = afazer.id;
+    }
+
+    final ParseResponse response = await parser.save();
     if (response.success && response.result != null) {
       final object = response.result as ParseObject;
       afazer.id = object.objectId!;
@@ -42,17 +46,12 @@ class AfazerRepository {
     }
   }
 
-  Future<void> updateTodo(String id, bool done) async {
-    var todo = ParseObject('Afazer')
-      ..objectId = id
-      ..set('done', done);
-    await todo.save();
+  Future<bool> excluirAfazer(Afazer afazer) async {
+    var parse = ParseObject('Afazer')..objectId = afazer.id;
+    final ParseResponse response = await parse.delete();
+    if (response.success){
+      return true;
+    }
+    return false;
   }
-
-  Future<void> deleteTodo(String id) async {
-    var todo = ParseObject('Afazer')..objectId = id;
-    await todo.delete();
-  }
-
-
 }

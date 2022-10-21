@@ -1,6 +1,6 @@
 import 'package:mobx/mobx.dart';
-import '../models/afazer.dart';
-import '../repositories/afazer_repository.dart';
+import 'package:mine/models/afazer.dart';
+import 'package:mine/repositories/afazer_repository.dart';
 
 //flutter pub run build_runner build
 part 'afazer_store.g.dart';
@@ -8,7 +8,6 @@ part 'afazer_store.g.dart';
 class AfazerStore = _AfazerStore with _$AfazerStore;
 
 abstract class _AfazerStore with Store {
-
 
   _AfazerStore(){
     carregarAfazeres();
@@ -41,5 +40,17 @@ abstract class _AfazerStore with Store {
     if (afazer != null){
       listaDeAfazeres.add(afazer);
     }
+  }
+
+  @action
+  Future<void> excluirAfazer(Afazer afazer) async{
+    final foiExcluido = await repository.excluirAfazer(afazer);
+    if (foiExcluido){
+      listaDeAfazeres.removeWhere((element) => element == afazer);
+    }
+  }
+
+  void atualizarAfazer(Afazer afazer){
+    repository.salvarAfazer(afazer);
   }
 }
